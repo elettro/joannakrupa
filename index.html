@@ -7,6 +7,241 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <style>
+
+/* ── YOUTUBE PLAYLIST PLAYER ── */
+.yt-player-section {
+  position: relative;
+  background: #000;
+  padding: 100px 0 60px;
+  overflow: hidden;
+}
+.yt-player-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(201,169,110,0.07) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 50%, rgba(201,169,110,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+.yt-player-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+.yt-player-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.yt-player-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.yt-player-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--off-white);
+  letter-spacing: 0.05em;
+}
+.yt-player-title em { color: var(--gold); font-style: italic; }
+.yt-player-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  align-items: start;
+}
+/* Primary video */
+.yt-primary {
+  position: relative;
+  border: 1px solid rgba(201,169,110,0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #000;
+}
+.yt-primary-frame {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+}
+.yt-primary-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+.yt-primary-meta {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(201,169,110,0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.yt-primary-badge {
+  background: linear-gradient(135deg, var(--gold), #a87d3e);
+  color: #000;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.yt-primary-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--off-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Sidebar playlist */
+.yt-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: 480px;
+  overflow-y: auto;
+  border: 1px solid rgba(201,169,110,0.15);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.02);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201,169,110,0.3) transparent;
+}
+.yt-sidebar::-webkit-scrollbar { width: 4px; }
+.yt-sidebar::-webkit-scrollbar-track { background: transparent; }
+.yt-sidebar::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.3); border-radius: 2px; }
+.yt-sidebar-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid rgba(201,169,110,0.1);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  position: sticky;
+  top: 0;
+  background: rgba(10,10,10,0.95);
+  backdrop-filter: blur(8px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.yt-sidebar-count {
+  background: rgba(201,169,110,0.15);
+  border: 1px solid rgba(201,169,110,0.2);
+  color: var(--gold);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+.yt-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.2s;
+  align-items: flex-start;
+}
+.yt-item:last-child { border-bottom: none; }
+.yt-item:hover { background: rgba(201,169,110,0.07); }
+.yt-item.active { background: rgba(201,169,110,0.12); border-left: 2px solid var(--gold); }
+.yt-thumb-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 96px;
+  height: 54px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #111;
+}
+.yt-thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.yt-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.3);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.yt-item:hover .yt-play-overlay,
+.yt-item.active .yt-play-overlay { opacity: 1; }
+.yt-play-icon {
+  width: 22px;
+  height: 22px;
+  background: rgba(201,169,110,0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: #000;
+  padding-left: 2px;
+}
+.yt-item-info { flex: 1; min-width: 0; }
+.yt-item-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--off-white);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.yt-item.active .yt-item-title { color: var(--gold); }
+.yt-item-num {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.yt-view-all {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-decoration: none;
+  border-top: 1px solid rgba(201,169,110,0.1);
+  transition: background 0.2s;
+  margin-top: 2px;
+}
+.yt-view-all:hover { background: rgba(201,169,110,0.07); }
+@media (max-width: 900px) {
+  .yt-player-layout { grid-template-columns: 1fr; }
+  .yt-sidebar { max-height: 300px; }
+}
+@media (max-width: 600px) {
+  .yt-player-inner { padding: 0 16px; }
+}
+
 /* ── LANGUAGE TOGGLE ── */
 .lang-toggle {
   display: flex;
@@ -264,6 +499,47 @@
     <a href="#contact" class="nav-cta" data-en="Brand Inquiries" data-pl="Zapytania Brandowe">Brand Inquiries</a>
   </div>
 </nav>
+
+
+<!-- YOUTUBE PLAYLIST PLAYER -->
+<section class="yt-player-section">
+  <div class="yt-player-inner">
+    <div class="yt-player-header">
+      <span class="yt-player-label" data-en="Watch" data-pl="Oglądaj">Watch</span>
+      <h2 class="yt-player-title" data-en="Street Rescue — <em>The Series</em>" data-pl="Street Rescue — <em>Serial</em>">Street Rescue — <em>The Series</em></h2>
+    </div>
+    <div class="yt-player-layout">
+      <!-- PRIMARY PLAYER -->
+      <div class="yt-primary">
+        <div class="yt-primary-frame">
+          <iframe
+            id="ytMainPlayer"
+            src="https://www.youtube.com/embed/GxYcQiEZbL8?list=PL7WLWKpQqlRjWNa7OP7K06I-Peex1cjwi&autoplay=0&rel=0&modestbranding=1"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            title="Street Rescue with Joanna Krupa">
+          </iframe>
+        </div>
+        <div class="yt-primary-meta">
+          <span class="yt-primary-badge" data-en="Now Playing" data-pl="Teraz Gra">Now Playing</span>
+          <span class="yt-primary-name" id="ytNowPlayingTitle">Street Rescue with Joanna Krupa — Ep. 1</span>
+          <a href="https://www.youtube.com/playlist?list=PL7WLWKpQqlRjWNa7OP7K06I-Peex1cjwi" target="_blank" rel="noopener noreferrer" style="margin-left:auto;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;" data-en="↗ Full Playlist" data-pl="↗ Pełna Lista">↗ Full Playlist</a>
+        </div>
+      </div>
+
+      <!-- SIDEBAR QUEUE — real video IDs only -->
+      <div class="yt-sidebar">
+        <div class="yt-sidebar-header">
+          <span data-en="Episodes" data-pl="Odcinki">Episodes</span>
+          <span class="yt-sidebar-count">4 Videos</span>
+        </div>
+        <div id="ytQueueList"></div>
+        <a href="https://www.youtube.com/playlist?list=PL7WLWKpQqlRjWNa7OP7K06I-Peex1cjwi" target="_blank" rel="noopener noreferrer" class="yt-view-all" data-en="↗ Full Playlist on YouTube" data-pl="↗ Pełna Lista na YouTube">↗ Full Playlist on YouTube</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <!-- HERO -->
 <section class="hero">
@@ -623,7 +899,7 @@
       <h2 class="cta-title" data-en="Ready to Partner<br>with an <em>Icon?</em>" data-pl="Gotowy na Współpracę<br>z <em>Ikoną?</em>">Ready to Partner<br>with an <em>Icon?</em></h2>
       <p class="cta-sub" data-en="Joanna is selectively accepting brand partnerships that align with her values of beauty, wellness, and ethical living. Reach out to explore what's possible." data-pl="Joanna selektywnie przyjmuje partnerstwa z markami, które są zgodne z jej wartościami dotyczącymi urody, zdrowia i etycznego życia. Skontaktuj się, aby zbadać możliwości.">Joanna is selectively accepting brand partnerships that align with her values of beauty, wellness, and ethical living. Reach out to explore what's possible.</p>
       <div class="cta-buttons">
-        <a href="mailto:brandpartnerships@joannakrupa.com" class="btn-primary">
+        <a href="/cdn-cgi/l/email-protection#630111020d07130211170d0611100b0a131023090c020d0d0208111613024d000c0e" class="btn-primary">
           <span data-en="✉ &nbsp; Submit Brand Inquiry" data-pl="✉ &nbsp; Wyślij Zapytanie Brandowe">✉ &nbsp; Submit Brand Inquiry</span>
         </a>
         <a href="https://www.instagram.com/joannakrupa/" target="_blank" rel="noopener noreferrer" class="btn-secondary">
@@ -645,7 +921,48 @@
   <div class="footer-copy" data-en="© 2026 Joanna Krupa. All rights reserved." data-pl="© 2026 Joanna Krupa. Wszelkie prawa zastrzeżone.">© 2026 Joanna Krupa. All rights reserved.</div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // ── YouTube Queue — Street Rescue (real video IDs) ──
+  const ytVideos = [
+    { id: 'GxYcQiEZbL8', title: 'Street Rescue with Joanna Krupa — Ep. 1' },
+    { id: 'DBsh91vsqhg', title: 'Street Rescue with Joanna Krupa — Ep. 2' },
+    { id: 'RdcHTMutNY8', title: 'Street Rescue with Joanna Krupa — Ep. 3' },
+    { id: '7KkwnDXCksw', title: 'Street Rescue with Joanna Krupa — Ep. 4' },
+  ];
+
+  const ytMainPlayer   = document.getElementById('ytMainPlayer');
+  const ytNowPlaying   = document.getElementById('ytNowPlayingTitle');
+  const ytQueueList    = document.getElementById('ytQueueList');
+
+  function ytLoadVideo(index) {
+    const v = ytVideos[index];
+    ytMainPlayer.src = 'https://www.youtube.com/embed/' + v.id
+      + '?list=PL7WLWKpQqlRjWNa7OP7K06I-Peex1cjwi&autoplay=1&rel=0&modestbranding=1';
+    ytNowPlaying.textContent = v.title;
+    document.querySelectorAll('.yt-item').forEach((el, i) => {
+      el.classList.toggle('active', i === index);
+      el.querySelector('.yt-item-num').textContent = i === index ? 'NOW PLAYING' : '#' + (i + 1);
+    });
+    document.querySelector('.yt-item.active')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  // Build queue items
+  ytVideos.forEach((v, i) => {
+    const item = document.createElement('div');
+    item.className = 'yt-item' + (i === 0 ? ' active' : '');
+    item.innerHTML = \`
+      <div class="yt-thumb-wrap">
+        <img src="https://img.youtube.com/vi/\${v.id}/mqdefault.jpg" alt="\${v.title}" loading="lazy">
+        <div class="yt-play-overlay"><div class="yt-play-icon">▶</div></div>
+      </div>
+      <div class="yt-item-info">
+        <div class="yt-item-title">\${v.title}</div>
+        <div class="yt-item-num">\${i === 0 ? 'NOW PLAYING' : '#' + (i + 1)}</div>
+      </div>\`;
+    item.addEventListener('click', () => ytLoadVideo(i));
+    ytQueueList.appendChild(item);
+  });
+
   // ── Scroll reveal ──
   const reveals = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver((entries) => {
@@ -698,9 +1015,4 @@
   });
 
   // ── Stagger children within reveal containers ──
-  document.querySelectorAll('.highlight-item, .offer-item, .category-card, .reach-card, .market-tag, .dioz-stat-card, .dioz-way').forEach((el, i) => {
-    el.style.transitionDelay = (i % 8 * 60) + 'ms';
-  });
-</script>
-</body>
-</html>
+  document.querySelectorAll('.highlight-item, .offer-item, .category-c

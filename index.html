@@ -531,7 +531,7 @@
       <div class="yt-sidebar">
         <div class="yt-sidebar-header">
           <span data-en="Episodes" data-pl="Odcinki">Episodes</span>
-          <span class="yt-sidebar-count">4 Videos</span>
+          <span class="yt-sidebar-count" id="ytSidebarCount">0 Videos</span>
         </div>
         <div id="ytQueueList"></div>
         <a href="https://www.youtube.com/playlist?list=PL7WLWKpQqlRjWNa7OP7K06I-Peex1cjwi" target="_blank" rel="noopener noreferrer" class="yt-view-all" data-en="↗ Full Playlist on YouTube" data-pl="↗ Pełna Lista na YouTube">↗ Full Playlist on YouTube</a>
@@ -929,13 +929,16 @@
     { id: 'RdcHTMutNY8', title: 'Street Rescue with Joanna Krupa — Ep. 3' },
     { id: '7KkwnDXCksw', title: 'Street Rescue with Joanna Krupa — Ep. 4' },
   ];
+  const availableYtVideos = [];
 
   const ytMainPlayer   = document.getElementById('ytMainPlayer');
   const ytNowPlaying   = document.getElementById('ytNowPlayingTitle');
   const ytQueueList    = document.getElementById('ytQueueList');
+  const ytSidebarCount = document.getElementById('ytSidebarCount');
 
   function ytLoadVideo(index) {
-    const v = ytVideos[index];
+    const v = availableYtVideos[index];
+    if (!v) return;
     ytMainPlayer.src = 'https://www.youtube.com/embed/' + v.id
       + '?list=PL7WLWKpQqlRjWNa7OP7K06I-Peex1cjwi&autoplay=1&rel=0&modestbranding=1';
     ytNowPlaying.textContent = v.title;
@@ -946,21 +949,44 @@
     document.querySelector('.yt-item.active')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
-  // Build queue items
-  ytVideos.forEach((v, i) => {
+  function updateYtCount() {
+    const count = availableYtVideos.length;
+    ytSidebarCount.textContent = `${count} Video${count === 1 ? '' : 's'}`;
+  }
+
+  function queueYtVideo(v) {
+    const i = availableYtVideos.length;
+    availableYtVideos.push(v);
+
     const item = document.createElement('div');
     item.className = 'yt-item' + (i === 0 ? ' active' : '');
-    item.innerHTML = \`
+    item.innerHTML = `
       <div class="yt-thumb-wrap">
-        <img src="https://img.youtube.com/vi/\${v.id}/mqdefault.jpg" alt="\${v.title}" loading="lazy">
+        <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.title}" loading="lazy">
         <div class="yt-play-overlay"><div class="yt-play-icon">▶</div></div>
       </div>
       <div class="yt-item-info">
-        <div class="yt-item-title">\${v.title}</div>
-        <div class="yt-item-num">\${i === 0 ? 'NOW PLAYING' : '#' + (i + 1)}</div>
-      </div>\`;
+        <div class="yt-item-title">${v.title}</div>
+        <div class="yt-item-num">${i === 0 ? 'NOW PLAYING' : '#' + (i + 1)}</div>
+      </div>`;
     item.addEventListener('click', () => ytLoadVideo(i));
     ytQueueList.appendChild(item);
+    updateYtCount();
+
+    // Ensure the primary player always points to the first available video.
+    if (i === 0) {
+      ytMainPlayer.src = 'https://www.youtube.com/embed/' + v.id
+        + '?list=PL7WLWKpQqlRjWNa7OP7K06I-Peex1cjwi&autoplay=0&rel=0&modestbranding=1';
+      ytNowPlaying.textContent = v.title;
+    }
+  }
+
+  // Build queue items and skip videos with broken thumbnails (usually unavailable/deleted).
+  ytVideos.forEach((v) => {
+    const thumb = new Image();
+    thumb.onload = () => queueYtVideo(v);
+    thumb.onerror = () => updateYtCount();
+    thumb.src = `https://img.youtube.com/vi/${v.id}/mqdefault.jpg`;
   });
 
   // ── Scroll reveal ──
@@ -1014,5 +1040,8 @@
     applyLanguage(langSwitch.checked ? 'pl' : 'en');
   });
 
-  // ── Stagger children within reveal containers ──
-  document.querySelectorAll('.highlight-item, .offer-item, .category-c
+  // Initialize language from toggle state
+  applyLanguage(langSwitch.checked ? 'pl' : 'en');
+</script>
+</body>
+</html>

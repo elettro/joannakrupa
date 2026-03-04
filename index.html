@@ -240,6 +240,11 @@
 }
 @media (max-width: 600px) {
   .yt-player-inner { padding: 0 16px; }
+  .yt-primary-frame {
+    padding-top: 0;
+    aspect-ratio: 16 / 9;
+    min-height: 220px;
+  }
 }
 
 /* ── LANGUAGE TOGGLE ── */
@@ -514,7 +519,7 @@
         <div class="yt-primary-frame">
           <iframe
             id="ytMainPlayer"
-            src="https://www.youtube.com/embed/GxYcQiEZbL8?list=PL7WLWKpQqlRjWNa7OP7K06I-Peex1cjwi&autoplay=0&rel=0&modestbranding=1"
+            src="about:blank"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
             title="Street Rescue with Joanna Krupa">
@@ -954,6 +959,15 @@
     ytSidebarCount.textContent = `${count} Video${count === 1 ? '' : 's'}`;
   }
 
+  async function isYtVideoPlayable(videoId) {
+    try {
+      const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
   function queueYtVideo(v) {
     const i = availableYtVideos.length;
     availableYtVideos.push(v);
@@ -981,13 +995,23 @@
     }
   }
 
-  // Build queue items and skip videos with broken thumbnails (usually unavailable/deleted).
-  ytVideos.forEach((v) => {
-    const thumb = new Image();
-    thumb.onload = () => queueYtVideo(v);
-    thumb.onerror = () => updateYtCount();
-    thumb.src = `https://img.youtube.com/vi/${v.id}/mqdefault.jpg`;
-  });
+  // Build queue items and skip unavailable/private/deleted videos.
+  async function initializeYtQueue() {
+    const availability = await Promise.all(
+      ytVideos.map(async (v) => ({ video: v, playable: await isYtVideoPlayable(v.id) }))
+    );
+
+    availability.forEach(({ video, playable }) => {
+      if (playable) queueYtVideo(video);
+    });
+
+    if (!availableYtVideos.length) {
+      ytNowPlaying.textContent = 'No playable videos are currently available.';
+      updateYtCount();
+    }
+  }
+
+  initializeYtQueue();
 
   // ── Scroll reveal ──
   const reveals = document.querySelectorAll('.reveal');

@@ -738,6 +738,10 @@
   }
 
   @media (max-width: 600px) {
+    body::before {
+      display: none;
+    }
+
     .reach-grid,
     .categories-grid {
       grid-template-columns: 1fr;
